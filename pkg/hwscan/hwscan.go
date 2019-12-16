@@ -34,7 +34,6 @@ func (s *Scanner) Report() error {
 	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Field", "TTL (seconds)", "TTL (minutes)", "TTL (hours)"})
-	//table.SetFooter([]string{"", "", "", ""})
 	table.SetRowLine(true)
 	table.AppendBulk(data)
 	table.Render()
@@ -65,15 +64,6 @@ func (s *Scanner) Report() error {
 
 	fmt.Printf("X-HW: %s\n", strings.Join(s.Pragma.XHW, ","))
 
-	//fmt.Printf("CDN Cache: [%d] seconds ( [%d] minutes or [%d] hours )\n", s.Pragma.XHWCacheTTL, s.Pragma.XHWCacheTTL/60, s.Pragma.XHWCacheTTL/60/60)
-	//fmt.Printf("Last Refreshed: [%d] seconds ( [%d] minutes or [%d] hours ) ago\n", s.Pragma.XHWCacheLastRefresh, s.Pragma.XHWCacheLastRefresh/60, s.Pragma.XHWCacheLastRefresh/60/60)
-	//fmt.Printf("Reported browser cache: ( %s )\n", strings.Join(s.Pragma.CacheControl, ", "))
-	//fmt.Printf("Content Length: %d ", s.Pragma.ContentLength)
-	//if s.Pragma.ContentLength > 0 {
-	//	fmt.Printf("indicates content returned\n")
-	//} else {
-	//	fmt.Printf("\n")
-	//}
 	return nil
 }
 
@@ -108,21 +98,16 @@ func (s *Scanner) Pack(r *http.Response) []error {
 	prepackStorage := make(map[string]interface{})
 	reflection := reflect.TypeOf(*s.Pragma)
 
-	//spew.Dump(r.Header)
-
 	// Extract all headers that correlate to a field
 	for k, v := range r.Header {
-		//fmt.Println("==================")
-		//fmt.Printf("===== Key: %s\n", k)
+
 		for x := 0; x < reflection.NumField(); x++ {
-			//fmt.Println("=========")
-			//fmt.Printf("Iter %d of %d\n", x, reflection.NumField())
+
 			thisField := reflection.Field(x)
 			if val, ok := thisField.Tag.Lookup("pragma"); ok {
-				//fmt.Printf("found | %s\n", val)
-				//fmt.Printf("compare | %s\n", k)
+
 				if strings.ToLower(k) == strings.ToLower(val) {
-					//fmt.Printf("Found key: %v\n", k)
+
 					prepackStorage[thisField.Name] = v
 				}
 			}
@@ -286,12 +271,3 @@ func extractIntegerFromStringSlice(s []string) (int, error) {
 func errConversionFailed(field string) error {
 	return fmt.Errorf("failed to convert %s", field)
 }
-
-// Pack packs the struct with data from a scan
-
-////////////////////////////////////////////////
-/*
-
-	*2
-		X-HW-Cache-Headers: Content-Length=411720;Content-MD5=mtz16PLObXslE3A3NXhhwA==;Expires=Mon, 16 Dec 2019 18:41:33 GMT;Cache-Control=max-age=0, no-cache, no-store;Pragma=no-cache;Date=Mon, 16 Dec 2019 18:41:33 GMT;Connection=keep-alive;Access-Control-Allow-Headers=origin,range,hdntl,hdnts;Access-Control-Expose-Headers=Server,range,hdntl,hdnts;Access-Control-Allow-Methods=GET, HEAD, OPTIONS;Access-Control-Allow-Origin=*;Content-Type=video/MP2T
-*/
